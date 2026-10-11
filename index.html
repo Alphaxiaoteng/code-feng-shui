@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>代码风水罗盘 (CodeFengShui) - 东方极客八卦堪舆殿堂</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="stylesheet" href="fengshui.css">
+</head>
+<body>
+
+  <!-- 0. 全屏太极星空背景 Canvas -->
+  <canvas id="bg-canvas"></canvas>
+
+  <!-- 1. 顶部全局导航栏 -->
+  <header class="top-header">
+    <div class="brand-section">
+      <div class="logo-badge">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+          <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+          <path d="M12 2a10 10 0 0 0 0 20 5 5 0 0 0 0-10 5 5 0 0 1 0-10z" fill="currentColor"/>
+          <circle cx="12" cy="7" r="2" fill="#07080b"/>
+          <circle cx="12" cy="17" r="2" fill="currentColor"/>
+        </svg>
+      </div>
+      <div>
+        <span class="brand-name">代码风水罗盘</span>
+        <span class="brand-tag">Cyber FengShui</span>
+      </div>
+    </div>
+
+    <!-- 中部：三步分步场景向导条 (Scene Stepper) -->
+    <nav class="workflow-stepper" aria-label="堪舆流程">
+      <button class="step-item active" id="nav-step-1" data-scene="scene-input">
+        <span class="step-num">1</span>
+        <span class="step-label">投喂经卷</span>
+      </button>
+      <span class="step-divider">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+      </span>
+      <button class="step-item" id="nav-step-2" data-scene="scene-inspection">
+        <span class="step-num">2</span>
+        <span class="step-label">动盘堪舆</span>
+      </button>
+      <span class="step-divider">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+      </span>
+      <button class="step-item" id="nav-step-3" data-scene="scene-delivery">
+        <span class="step-num">3</span>
+        <span class="step-label">请神化煞</span>
+      </button>
+    </nav>
+
+    <!-- 右侧道行与静音控制 (默认静音，绝无恶心低频) -->
+    <div class="header-right-controls">
+      <div class="merit-badge">
+        <span>功德</span>
+        <span class="merit-val" id="merit-counter">+88</span>
+      </div>
+      <button class="btn-sound-pill muted" id="btn-sound-toggle" title="声音控制 (默认关闭)">
+        <svg class="sound-icon-off" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="1" y1="1" x2="23" y2="23"></line>
+          <path d="M9 9v3a3 3 0 0 0 5.12 2.12M15 9.34V4a3 3 0 0 0-5.94-.6"></path>
+          <path d="M17 16.95A7 7 0 0 1 5 12v-2m14 0v2a7 7 0 0 1-.11 1.23"></path>
+        </svg>
+        <svg class="sound-icon-on" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: none;">
+          <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+          <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+        </svg>
+        <span id="sound-status-label">静音</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- 2. 主多场景舞台容器 (Multi-Scene Flow) -->
+  <main class="multiscene-container">
+
+    <!-- =====================================================================
+         场景 1：【投喂经卷 (Scene 1: Input)】—— 宽敞、居中、易用、支持拖拽与剪贴板
+         ===================================================================== -->
+    <section class="scene-stage scene-input active" id="scene-input">
+      <div class="scene-input-wrapper">
+        
+        <div class="scene-input-header">
+          <div class="scene-eyebrow daoist-seal-badge">
+            <span class="seal-square-mark">太上</span>
+            <span class="seal-text-title">太上玄门 · 钦赐天机案</span>
+          </div>
+          <h1 class="scene-headline daoist-title">代码风水堪舆台 · 开坛断吉凶</h1>
+          <p class="scene-subline">天圆地方，律令九章。直接粘贴经卷、拖拽源文件入坛，或一键翻阅历代大厂真实奇煞案卷</p>
+        </div>
+
+        <!-- 道藏册府 · 奇煞档案画廊 (Rich Scripture Dossier Gallery) -->
+        <div class="dossier-gallery-section" id="dossier-gallery-section">
+          <div class="gallery-header-row">
+            <div class="gallery-title-group">
+              <svg class="gallery-seal-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2.2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+              <span class="gallery-title">道藏册府 · 历代大厂奇煞档案</span>
+              <span class="gallery-count-pill" id="gallery-count-pill">8 卷</span>
+            </div>
+            <div class="gallery-view-switcher">
+              <button class="btn-gallery-nav" id="btn-gallery-prev" title="向左翻卷">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
+              </button>
+              <button class="btn-gallery-nav" id="btn-gallery-next" title="向右翻卷">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- 8 大真实工业案卷锦匣画廊 (横向流体滑动卡片) -->
+          <div class="dossier-cards-track" id="dossier-cards-track">
+            <!-- 动态注入 8 张图形化案卷锦匣卡片 -->
+          </div>
+        </div>
+
+        <!-- 当前选中案卷天机题拔照壁 (Selected Dossier Briefing) -->
+        <div class="dossier-brief-banner" id="dossier-brief-banner">
+          <div class="brief-lead">
+            <span class="brief-seal-mark" id="brief-seal-mark">【破财】</span>
+            <span class="brief-title" id="brief-title">除夕挤兑·双花阴煞案</span>
+            <span class="brief-lang-tag" id="brief-lang-tag">JavaScript · 支付中心</span>
+          </div>
+          <div class="brief-story" id="brief-story">
+            某跨国电商在除夕零点秒杀中，因空 catch 吞噬银行接口超时异常并返回 null，导致下游仓库疯狂发货，除夕夜产生数百万幽灵资损。
+          </div>
+        </div>
+
+        <!-- 东方道藏经卷工作台 (四周镶嵌云雷金纹角花) -->
+        <div class="code-desk-card daoist-altar-desk" id="drop-zone">
+          <!-- 四角古典云雷纹金丝微雕角花 (SVG Corner Filigree) -->
+          <svg class="desk-corner corner-tl" width="28" height="28" viewBox="0 0 28 28" fill="none">
+            <path d="M2 26V8C2 4.686 4.686 2 8 2H26" stroke="#f59e0b" stroke-width="1.8" stroke-linecap="round"/>
+            <path d="M6 22V10C6 7.79 7.79 6 10 6H22" stroke="#f59e0b" stroke-width="1" stroke-opacity="0.6"/>
+            <circle cx="14" cy="14" r="1.5" fill="#f59e0b"/>
+          </svg>
+          <svg class="desk-corner corner-tr" width="28" height="28" viewBox="0 0 28 28" fill="none">
+            <path d="M26 26V8C26 4.686 23.314 2 20 2H2" stroke="#f59e0b" stroke-width="1.8" stroke-linecap="round"/>
+            <path d="M22 22V10C22 7.79 20.21 6 18 6H6" stroke="#f59e0b" stroke-width="1" stroke-opacity="0.6"/>
+            <circle cx="14" cy="14" r="1.5" fill="#f59e0b"/>
+          </svg>
+          <svg class="desk-corner corner-bl" width="28" height="28" viewBox="0 0 28 28" fill="none">
+            <path d="M2 2V20C2 23.314 4.686 26 8 26H26" stroke="#f59e0b" stroke-width="1.8" stroke-linecap="round"/>
+            <path d="M6 6V18C6 20.21 7.79 22 10 22H22" stroke="#f59e0b" stroke-width="1" stroke-opacity="0.6"/>
+            <circle cx="14" cy="14" r="1.5" fill="#f59e0b"/>
+          </svg>
+          <svg class="desk-corner corner-br" width="28" height="28" viewBox="0 0 28 28" fill="none">
+            <path d="M26 2V20C26 23.314 23.314 26 20 26H2" stroke="#f59e0b" stroke-width="1.8" stroke-linecap="round"/>
+            <path d="M22 6V18C22 20.21 20.21 22 18 22H6" stroke="#f59e0b" stroke-width="1" stroke-opacity="0.6"/>
+            <circle cx="14" cy="14" r="1.5" fill="#f59e0b"/>
+          </svg>
+
+          <!-- 经卷题额工具栏 -->
+          <div class="desk-toolbar daoist-desk-toolbar">
+            <div class="desk-meta">
+              <span class="cinnabar-tag">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><rect width="24" height="24" rx="3"/></svg>
+                <span>道藏法卷</span>
+              </span>
+              <span class="lang-tag" id="current-lang-pill">JavaScript</span>
+              <span class="desk-stat" id="editor-char-stats">70 行 · 2,480 字符</span>
+            </div>
+            <div class="desk-actions">
+              <button class="btn-desk-tool btn-tool-amber" id="btn-desk-random" title="随机抽签布煞">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+                <span>虚空布煞 · 随机天机</span>
+              </button>
+              <button class="btn-desk-tool" id="btn-desk-paste" title="从剪贴板读取代码">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg>
+                <span>虚空纳气 · 粘贴</span>
+              </button>
+              <button class="btn-desk-tool" id="btn-desk-clear" title="清空编辑器">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                <span>焚香净砚 · 清空</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- 经卷代码主体 (440px 纵深通透) -->
+          <div class="desk-editor-body daoist-editor-body">
+            <div class="desk-line-numbers" id="desk-line-numbers">1</div>
+            <textarea 
+              class="desk-code-textarea" 
+              id="main-code-input" 
+              spellcheck="false" 
+              placeholder="// 【太上老君急急如律令】在此粘贴待测经卷代码，或直接将 .js / .ts / .py / .sql / .go 文件拖拽至此经案...&#10;// 亦可点击上方【道藏案卷】玉简切换大厂经典幽灵双花、邪神内存黑洞等真实大案；&#10;// 备妥之后，点击下方【运八卦罗盘 · 敕开法坛】推演生辰八字与六合神煞！"></textarea>
+          </div>
+
+          <!-- 文件拖拽悬浮提示层 (朱砂宣纸符咒金辉) -->
+          <div class="drop-overlay daoist-drop-overlay" id="drop-overlay">
+            <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="1.8"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+            <span class="overlay-main-text">松开法印 · 经卷归位</span>
+            <span class="overlay-sub-text">支持各类语言代码文本秒读</span>
+          </div>
+        </div>
+
+        <!-- 场景 1 底部主行动大按钮 (錾金令旗风格) -->
+        <div class="scene-input-footer">
+          <button class="btn-hero-primary daoist-btn-hero" id="btn-launch-analyze">
+            <span class="btn-flank-bagua">☰</span>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"></circle><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon></svg>
+            <span class="btn-hero-text">运八卦罗盘 · 敕开法坛</span>
+            <span class="btn-flank-bagua">☷</span>
+            <kbd>Enter</kbd>
+          </button>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- =====================================================================
+         场景 2：【动盘堪舆 (Scene 2: Inspection)】—— 巨幅罗盘 + 神煞手风琴处方案
+         ===================================================================== -->
+    <section class="scene-stage scene-inspection" id="scene-inspection">
+      <div class="inspection-stage-grid">
+
+        <!-- 左侧：神煞病灶与处方案 (纯粹诊断，零拥挤，零难看 textarea) -->
+        <div class="inspection-left-card">
+          <div class="card-clean-header">
+            <div class="title-with-icon">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+              <span>神煞病灶与化煞处方</span>
+            </div>
+            <span class="sha-count-pill" id="inspection-sha-count">3 处煞位</span>
+          </div>
+
+          <!-- 命谱指标横幅 -->
+          <div class="metrics-summary-bar">
+            <div class="metric-block">
+              <span class="m-val" id="metric-lines-val">14</span>
+              <span class="m-lbl">代码行数</span>
+            </div>
+            <div class="metric-block">
+              <span class="m-val" id="metric-complexity-val">2</span>
+              <span class="m-lbl">圈复杂度</span>
+            </div>
+            <div class="metric-block">
+              <span class="m-val" id="metric-depth-val">2</span>
+              <span class="m-lbl">深渊层级</span>
+            </div>
+            <div class="metric-block" style="flex: 1.4;">
+              <span class="m-val" id="scripture-title-label" style="font-size: 11.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">window.god</span>
+              <span class="m-lbl">当前卷宗</span>
+            </div>
+          </div>
+
+          <!-- 神煞手风琴列表 (完全手绘 SVG 箭头，展开查看病因与处方) -->
+          <div class="sha-accordion-container" id="inspection-sha-accordion">
+            <!-- 动态注入 -->
+          </div>
+
+          <!-- 道长法帖判词卡片 -->
+          <div class="verdict-card">
+            <div class="verdict-header">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+              <span>天机勘验判词</span>
+            </div>
+            <div class="verdict-content" id="taoist-verdict-text">
+              “此段代码煞气冲天，五行严重失调！若强行上线，三更半夜必有警报破门，主程宜速作重构法事！”
+            </div>
+          </div>
+        </div>
+
+        <!-- 右侧：380px 巨幅八卦罗盘仪与生辰八字生克大阵 -->
+        <div class="inspection-right-card">
+          <div class="card-clean-header">
+            <div class="title-with-icon">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"></polygon></svg>
+              <span>天池八卦方位罗盘仪</span>
+            </div>
+            <span class="compass-status-text" id="luopan-status-text">磁场平稳</span>
+          </div>
+
+          <!-- 巨幅 380px 八卦同心罗盘 -->
+          <div class="luopan-stage-wrapper">
+            <div class="grand-luopan-square" id="luopan-square-disc">
+              <svg class="luopan-svg-ticks" id="luopan-ticks-svg" viewBox="0 0 380 380"></svg>
+              <div class="grand-ring ring-twentyfour" id="ring-twentyfour-disc"></div>
+              <div class="grand-ring ring-bagua-core" id="ring-bagua-disc">
+                <span class="bg-yao y-0">☰ 乾</span>
+                <span class="bg-yao y-45">☴ 巽</span>
+                <span class="bg-yao y-90">☵ 坎</span>
+                <span class="bg-yao y-135">☶ 艮</span>
+                <span class="bg-yao y-180">☷ 坤</span>
+                <span class="bg-yao y-225">☳ 震</span>
+                <span class="bg-yao y-270">☲ 离</span>
+                <span class="bg-yao y-315">☱ 兑</span>
+              </div>
+              <div class="grand-tianchi-pond">
+                <div class="tianchi-mirror-reflection"></div>
+                <div class="tianchi-crosshair-lines"></div>
+                <div class="needle-assembly" id="magnetic-needle">
+                  <div class="needle-tip-north"></div>
+                  <div class="needle-pivot"></div>
+                  <div class="needle-tip-south"></div>
+                </div>
+              </div>
+              <div class="compass-corner corner-tl">天圆</div>
+              <div class="compass-corner corner-tr">地方</div>
+              <div class="compass-corner corner-bl">律令</div>
+              <div class="compass-corner corner-br">九章</div>
+            </div>
+          </div>
+
+          <!-- 八字与五行大阵 -->
+          <div class="wuxing-energy-strip">
+            <div class="bazi-banner">
+              <span class="bazi-text" id="bazi-pillars-text">庚子 戊子 凶神坐煞 亡劫同临</span>
+              <span class="omen-badge" id="omen-rank-badge">大凶 · 劫数难逃</span>
+            </div>
+            <div class="wuxing-pillars-row">
+              <div class="wuxing-col fire">
+                <span class="col-lbl">火</span>
+                <div class="col-track"><div class="col-bar" id="bar-fire" style="height: 95%;"></div></div>
+              </div>
+              <div class="wuxing-col water">
+                <span class="col-lbl">水</span>
+                <div class="col-track"><div class="col-bar" id="bar-water" style="height: 60%;"></div></div>
+              </div>
+              <div class="wuxing-col metal">
+                <span class="col-lbl">金</span>
+                <div class="col-track"><div class="col-bar" id="bar-metal" style="height: 85%;"></div></div>
+              </div>
+              <div class="wuxing-col wood">
+                <span class="col-lbl">木</span>
+                <div class="col-track"><div class="col-bar" id="bar-wood" style="height: 20%;"></div></div>
+              </div>
+              <div class="wuxing-col earth">
+                <span class="col-lbl">土</span>
+                <div class="col-track"><div class="col-bar" id="bar-earth" style="height: 40%;"></div></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 场景 2 底部操作栏 -->
+          <div class="inspection-actions">
+            <button class="btn-sub-action" id="btn-back-to-input">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
+              <span>返回重新投喂</span>
+            </button>
+            <button class="btn-hero-primary daoist-btn-hero" id="btn-trigger-consecrate">
+              <span class="btn-flank-bagua">☰</span>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+              <span>请神重构 · 一键化煞</span>
+              <span class="btn-flank-bagua">☷</span>
+              <kbd>Space</kbd>
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- =====================================================================
+         场景 3：【请神化煞交付 (Scene 3: Delivery)】—— Diff 对比 + 2K 宣纸神符
+         ===================================================================== -->
+    <section class="scene-stage scene-delivery" id="scene-delivery">
+      <div class="delivery-stage-wrapper">
+        
+        <div class="delivery-hero-header">
+          <div class="delivery-status-pill">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            <span>化煞圆满 · 纯阳开光</span>
+          </div>
+          <h2 class="delivery-headline" id="delivery-title-blessing">敕令：天圆地方，律令九章。万虫潜藏，单测全绿！</h2>
+        </div>
+
+        <!-- 纯阳代码 Diff 对比审阅器 (宽屏双栏对比) -->
+        <div class="delivery-diff-card">
+          <div class="diff-split-container">
+            <div class="diff-pane diff-before">
+              <div class="diff-pane-header">
+                <span class="diff-badge bad">改前 · 阴煞深重</span>
+                <span class="diff-stat-line" id="diff-before-stats">原代码</span>
+              </div>
+              <pre class="diff-code-pre" id="diff-code-before"><code></code></pre>
+            </div>
+            <div class="diff-pane diff-after">
+              <div class="diff-pane-header">
+                <span class="diff-badge good">改后 · 纯阳生生不息</span>
+                <span class="diff-stat-line" id="diff-after-stats">开光重构代码</span>
+              </div>
+              <pre class="diff-code-pre" id="diff-code-after"><code></code></pre>
+            </div>
+          </div>
+          <div class="diff-card-footer">
+            <span class="diff-note">此重构遵循纯阳工程规范：消除全局副作用、化解恶性死循环、健全异常透传。</span>
+            <button class="btn-copy-purified" id="btn-copy-purified-code">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+              <span>一键复制纯阳重构代码</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- 交付动作按钮阵列 -->
+        <div class="delivery-actions-bar">
+          <button class="btn-delivery-gold" id="btn-download-talisman-poster">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+            <span>生成并下载 2K 宣纸镇宅神符壁纸 (PNG)</span>
+          </button>
+          <button class="btn-delivery-outline" id="btn-copy-talisman-text">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect></svg>
+            <span>复制 GitHub PR / README 战报</span>
+          </button>
+          <button class="btn-delivery-subtle" id="btn-restart-workflow">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"></polyline><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg>
+            <span>再测一卷</span>
+          </button>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <script src="fengshui.js"></script>
+</body>
+</html>

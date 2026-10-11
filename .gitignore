@@ -1,0 +1,13 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Testing & Logs
+.pytest_cache/
+*.log
+server.log
+
+# System files
+.DS_Store
+.kiro/
